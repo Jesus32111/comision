@@ -29,8 +29,8 @@
   position: absolute;
   bottom: 80px; /* bubble height + gap */
   left: 0; /* Alineado con la burbuja */
-  width: 350px;
-  height: 450px;
+  width: 400px; /* --- ANCHO AUMENTADO --- */
+  height: 650px; /* --- ALTURA AUMENTADA --- */
   background: white;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -88,30 +88,51 @@
   background-color: #f4f7f9; /* Fondo más claro */
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.25rem; /* Reducido para agrupar mensajes de recomendación */
 }
 
 .message {
-  max-width: 80%;
+  max-width: 85%; /* Un poco más de ancho para los mensajes */
   padding: 0.75rem 1rem;
-  border-radius: 12px;
-  line-height: 1.4;
+  border-radius: 18px; /* Más redondeado */
+  line-height: 1.5; /* Mejor espaciado de línea */
   word-wrap: break-word;
   animation: fadeIn 0.3s ease;
+  white-space: pre-wrap; /* --- RESPETA SALTOS DE LÍNEA --- */
+}
+
+.message strong {
+  font-weight: 600; /* Asegura que la negrita sea visible */
 }
 
 .user-msg {
   background: #0078D7; /* Azul corporativo */
   color: white;
   align-self: flex-end;
-  border-bottom-right-radius: 4px; /* Pequeño ajuste para el "pico" */
+  border-bottom-right-radius: 6px;
 }
 
 .bot-msg {
   background: #e2e8f0; /* Gris claro */
   color: #2d3748; /* Texto oscuro */
   align-self: flex-start;
-  border-bottom-left-radius: 4px; /* Pequeño ajuste para el "pico" */
+  border-bottom-left-radius: 6px;
+}
+
+/* Estilo para el texto introductorio del bot antes de una tarjeta */
+.bot-msg .bot-intro-text {
+  margin: 0;
+  padding: 0;
+}
+
+/* Contenedor del mensaje del bot cuando hay una recomendación */
+.bot-msg:has(.course-recommendation-card) {
+  background: transparent;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 100%;
 }
 
 @keyframes fadeIn {
@@ -178,6 +199,7 @@
   max-width: 100%; /* Asegurar que no se desborde */
   align-self: flex-start; /* Siempre alineado a la izquierda como mensaje del bot */
   border: 1px solid #e2e8f0;
+  animation: fadeIn 0.3s ease; /* Añadir animación */
 }
 
 .course-recommendation-card:hover {
@@ -221,7 +243,7 @@
   font-size: 0.9rem;
   color: #4a5568;
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.4; /* Mejor espaciado */
 }
 
 .course-rec-button {
