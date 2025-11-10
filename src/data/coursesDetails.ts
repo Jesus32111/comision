@@ -72,5 +72,68 @@ export const courseDetails: CourseDetail[] = [
       { id: '3-5', title: 'Proyecto final: Desplegar una aplicación MERN completa' }
     ]
   },
+  {
+    id: '4',
+    title: 'Gestión de Proyectos con Scrum y Kanban',
+    headerImage: 'https://images.pexels.com/photos/3184357/pexels-photo-3184357.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    longDescription: 'Este curso te sumerge en las metodologías ágiles más demandadas: Scrum y Kanban. Aprenderás a planificar, ejecutar y monitorear proyectos de manera flexible y eficiente, optimizando la entrega de valor y fomentando la colaboración en equipos de alto rendimiento. Ideal para líderes de proyecto, desarrolladores y cualquier profesional que busque mejorar la gestión de sus iniciativas.',
+    instructor: 'Ricardo Gómez',
+    learningObjectives: [
+      'Comprender los principios y valores del Manifiesto Ágil.',
+      'Aplicar el framework Scrum para la gestión de proyectos.',
+      'Implementar el método Kanban para visualizar y optimizar el flujo de trabajo.',
+      'Utilizar herramientas y técnicas para la estimación y planificación ágil.',
+      'Fomentar la mejora continua y la adaptación en los equipos de proyecto.'
+    ],
+    tasks: [
+      { id: '4-1', title: 'Creación de un Product Backlog y User Stories' },
+      { id: '4-2', title: 'Simulación de un Sprint Planning y Daily Scrum' },
+      { id: '4-3', title: 'Diseño de un tablero Kanban para un proyecto real' },
+      { id: '4-4', title: 'Análisis de métricas ágiles (Burndown Chart, Lead Time)' },
+      { id: '4-5', title: 'Proyecto final: Gestión de un proyecto con Scrum o Kanban' }
+    ]
+  },
+  {
+    id: '5',
+    title: 'Habilidades de Comunicación y Negociación',
+    headerImage: 'https://images.pexels.com/photos/3184405/pexels-photo-3184405.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    longDescription: 'Domina el arte de la comunicación efectiva y la negociación estratégica, habilidades esenciales para el éxito en cualquier ámbito profesional y personal. Este curso te proporcionará las herramientas para expresarte con claridad, escuchar activamente, persuadir con argumentos sólidos y alcanzar acuerdos beneficiosos para todas las partes, incluso en situaciones complejas.',
+    instructor: 'Sofía Vargas',
+    learningObjectives: [
+      'Desarrollar la escucha activa y la empatía en la comunicación.',
+      'Aplicar técnicas de comunicación verbal y no verbal para influir positivamente.',
+      'Identificar y manejar diferentes estilos de negociación.',
+      'Preparar y ejecutar estrategias de negociación exitosas.',
+      'Resolver conflictos de manera constructiva y colaborativa.'
+    ],
+    tasks: [
+      { id: '5-1', title: 'Ejercicio de comunicación asertiva' },
+      { id: '5-2', title: 'Análisis de un caso de negociación compleja' },
+      { id: '5-3', title: 'Role-play de una situación de negociación' },
+      { id: '5-4', title: 'Preparación de una presentación persuasiva' },
+      { id: '5-5', title: 'Proyecto final: Plan de mejora de habilidades comunicativas y negociadoras' }
+    ]
+  },
+  {
+    id: '6',
+    title: 'Análisis de Datos para la Toma de Decisiones',
+    headerImage: 'https://images.pexels.com/photos/3184390/pexels-photo-3184390.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    longDescription: 'En la era de la información, la capacidad de analizar datos y convertirlos en insights accionables es una ventaja competitiva. Este curso te enseñará a recolectar, limpiar, visualizar e interpretar datos para fundamentar decisiones estratégicas, optimizar procesos y descubrir nuevas oportunidades de negocio. Ideal para profesionales de cualquier sector que busquen potenciar su pensamiento analítico.',
+    instructor: 'Daniel Castro',
+    learningObjectives: [
+      'Comprender el ciclo de vida del análisis de datos.',
+      'Utilizar herramientas básicas para la recolección y limpieza de datos.',
+      'Aplicar técnicas de visualización de datos para comunicar insights.',
+      'Realizar análisis estadísticos descriptivos e inferenciales.',
+      'Traducir los resultados del análisis de datos en recomendaciones estratégicas.'
+    ],
+    tasks: [
+      { id: '6-1', title: 'Recolección y limpieza de un dataset pequeño' },
+      { id: '6-2', title: 'Creación de visualizaciones de datos en una herramienta (ej. Excel, Power BI)' },
+      { id: '6-3', title: 'Análisis descriptivo de un conjunto de datos empresariales' },
+      { id: '6-4', title: 'Elaboración de un informe con insights y recomendaciones' },
+      { id: '6-5', title: 'Proyecto final: Análisis de datos para un caso de negocio real' }
+    ]
+  },
   // Añadir más detalles de cursos si es necesario
 ];

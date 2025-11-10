@@ -10,8 +10,10 @@ interface CourseDetailPageProps {
     nombre: string;
     email: string;
     purchasedCourses: string[]; // Ahora el usuario tiene cursos comprados
+    obtainedCertificates: string[]; // Añadido para consistencia, aunque no se usa directamente aquí
   };
   onPurchaseCourse: (courseId: string) => void; // Nueva prop para comprar el curso
+  onObtainCertificate: (courseId: string) => void; // Nueva prop para registrar el certificado
 }
 
 interface Task {
@@ -21,11 +23,12 @@ interface Task {
   grade: number;
 }
 
-export default function CourseDetailPage({ courseId, onBack, user, onPurchaseCourse }: CourseDetailPageProps) {
+export default function CourseDetailPage({ courseId, onBack, user, onPurchaseCourse, onObtainCertificate }: CourseDetailPageProps) {
   const courseDetail = courseDetails.find(c => c.id === courseId);
   const courseData = courses.find(c => c.id === courseId); // Obtenemos los datos del curso con el costo
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activeTab, setActiveTab] = useState('description');
+  const [showCertificateModal, setShowCertificateModal] = useState(false); // Nuevo estado para el modal de certificado
 
   const progressStorageKey = `course_progress_${user.email}_${courseId}`;
 
@@ -70,6 +73,18 @@ export default function CourseDetailPage({ courseId, onBack, user, onPurchaseCou
       finalGrade: avgGrade,
     };
   }, [tasks]);
+
+  // Condición para mostrar el botón de certificado
+  const showCertificateButton = useMemo(() => {
+    return isCoursePurchased && tasks.length > 0 && progressPercentage === 100 && finalGrade === 100;
+  }, [isCoursePurchased, tasks.length, progressPercentage, finalGrade]);
+
+  const handleGetCertificate = () => {
+    setShowCertificateModal(true);
+    onObtainCertificate(courseId); // Registrar el certificado
+    // Aquí podrías disparar una llamada a la API para generar/almacenar el certificado
+    console.log(`User ${user.email} is claiming certificate for course ${courseId}`);
+  };
 
   if (!courseDetail || !courseData) {
     return (
@@ -230,6 +245,14 @@ export default function CourseDetailPage({ courseId, onBack, user, onPurchaseCou
                       </ul>
                     </div>
                   )}
+                  {showCertificateButton && (
+                    <div className="certificate-button-wrapper">
+                      <button className="get-certificate-button" onClick={handleGetCertificate}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                        Obtener Certificado
+                      </button>
+                    </div>
+                  )}
                 </section>
               )}
 
@@ -238,6 +261,29 @@ export default function CourseDetailPage({ courseId, onBack, user, onPurchaseCou
 
         </div>
       </div>
+
+      {showCertificateModal && (
+        <div className="certificate-modal-overlay">
+          <div className="certificate-modal-content">
+            <button className="certificate-modal-close" onClick={() => setShowCertificateModal(false)}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <div className="certificate-modal-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <h2 className="certificate-modal-title">¡Felicidades!</h2>
+            <p className="certificate-modal-message">
+              Certificado de <strong>{courseDetail.title}</strong> conseguido.
+            </p>
+            <p className="certificate-modal-submessage">
+              ¡Has demostrado un dominio excepcional en este curso!
+            </p>
+            <button className="certificate-modal-action-button" onClick={() => setShowCertificateModal(false)}>
+              Ver mis cursos
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

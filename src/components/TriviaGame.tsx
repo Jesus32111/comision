@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { courses, Course } from '../data/courses'; // Importar datos de cursos
+import { courses } from '../data/courses'; // Importar datos de cursos
+import type { Course } from '../data/courses';
 import './TriviaGame.css'; // Importar estilos específicos del juego
 
 interface Question {
@@ -79,14 +80,17 @@ const triviaLevels: Level[] = [
 interface TriviaGameProps {
   onClose: () => void;
   onGameComplete: (won: boolean) => void;
+  onClaimGiftedCourse: (courseId: string) => void;
+  userPurchasedCourses: string[];
+  hasClaimedAnyGift: boolean; // Nueva prop para el premio único general
 }
 
 // Umbral para ganar el juego (70% de aciertos)
 const WIN_THRESHOLD_PERCENTAGE = 0.7;
-// Umbral para recibir el curso de regalo (5 aciertos)
-const GIFT_COURSE_THRESHOLD = 5;
+// Umbral para recibir el curso de regalo (3 aciertos)
+const GIFT_COURSE_THRESHOLD = 3; // Ahora 3 aciertos para ganar un curso
 
-export default function TriviaGame({ onClose, onGameComplete }: TriviaGameProps) {
+export default function TriviaGame({ onClose, onGameComplete, onClaimGiftedCourse, userPurchasedCourses, hasClaimedAnyGift }: TriviaGameProps) {
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0); // Contador de aciertos
@@ -104,12 +108,32 @@ export default function TriviaGame({ onClose, onGameComplete }: TriviaGameProps)
   // Seleccionar un curso para regalar (ej. el primero de la lista)
   const giftedCourse: Course | undefined = courses[0]; // "Liderazgo y Gestión de Equipos"
 
+  // Función para reiniciar el juego
+  const handleRestartGame = useCallback(() => {
+    setCurrentLevelIndex(0);
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setSelectedOption(null);
+    setShowResult(false);
+    setGameFinished(false);
+    setTimerKey(prevKey => prevKey + 1); // Asegura que la barra de tiempo se reinicie visualmente
+  }, []);
+
   // Effect for game completion
   useEffect(() => {
     if (gameFinished) {
       onGameComplete(score >= winThreshold);
     }
   }, [gameFinished, score, winThreshold, onGameComplete]);
+
+  const handleSubmitAnswer = useCallback((timedOut: boolean = false) => {
+    if (selectedOption === null && !timedOut) return;
+
+    setShowResult(true);
+    if (selectedOption === currentQuestion?.correctAnswer) {
+      setScore(prevScore => prevScore + 1);
+    }
+  }, [selectedOption, currentQuestion]);
 
   // Effect for timer logic
   useEffect(() => {
@@ -124,7 +148,7 @@ export default function TriviaGame({ onClose, onGameComplete }: TriviaGameProps)
     }, 10000); // 10 seconds
 
     return () => clearTimeout(timer);
-  }, [currentQuestion, currentQuestionIndex, currentLevelIndex, showResult, gameFinished, handleSubmitAnswer]); // Added handleSubmitAnswer to dependencies
+  }, [currentQuestion, currentQuestionIndex, currentLevelIndex, showResult, gameFinished, handleSubmitAnswer]);
 
   // Reset timer key when question changes
   useEffect(() => {
@@ -141,15 +165,6 @@ export default function TriviaGame({ onClose, onGameComplete }: TriviaGameProps)
       setSelectedOption(option);
     }
   };
-
-  const handleSubmitAnswer = useCallback((timedOut: boolean = false) => {
-    if (selectedOption === null && !timedOut) return;
-
-    setShowResult(true);
-    if (selectedOption === currentQuestion?.correctAnswer) {
-      setScore(prevScore => prevScore + 1);
-    }
-  }, [selectedOption, currentQuestion]);
 
   const handleNext = () => {
     setSelectedOption(null);
@@ -180,9 +195,80 @@ export default function TriviaGame({ onClose, onGameComplete }: TriviaGameProps)
   };
 
   if (gameFinished) {
-    const hasWonGame = score >= winThreshold;
-    const hasWonCourse = score >= GIFT_COURSE_THRESHOLD;
+    const hasWonGame = score >= winThreshold; // Ganar el juego completo (ej. 70% de aciertos)
+    const hasWonCourse = score >= GIFT_COURSE_THRESHOLD; // Ganar un curso (3 o más aciertos)
+    const hasAlreadyClaimedGiftedCourse = userPurchasedCourses.includes(giftedCourse?.id || ''); // Verificar si ya tiene el curso
 
+    if (!hasWonCourse) {
+      return (
+        <div className="trivia-nogift-overlay">
+          <div className="trivia-nogift-content">
+            <button className="trivia-nogift-close" onClick={onClose} aria-label="Cerrar">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+
+            <div className="trivia-nogift-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            </div>
+
+            <h2 className="trivia-nogift-title">¡No has ganado un curso!</h2>
+            <p className="trivia-nogift-message">
+              Necesitas al menos <strong className="text-primary">{GIFT_COURSE_THRESHOLD} aciertos</strong> para obtener un curso gratis.
+            </p>
+            <p className="trivia-nogift-message-secondary">
+              ¡Pero no te desanimes!
+            </p>
+            <p className="trivia-nogift-message-tertiary">
+              ¿Te gustaría volver a intentarlo y demostrar tu conocimiento?
+            </p>
+
+            <div className="trivia-nogift-actions">
+              <button className="trivia-nogift-button trivia-nogift-button-restart" onClick={handleRestartGame}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.5M22 12.5a10 10 0 0 1-18.8 4.5"/></svg>
+                Volver a intentar
+              </button>
+              <button className="trivia-nogift-button trivia-nogift-button-close" onClick={onClose}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Lógica para cuando el usuario SÍ ha ganado un curso (score >= GIFT_COURSE_THRESHOLD)
+    if (hasClaimedAnyGift) {
+      // Si ya ha reclamado CUALQUIER regalo antes, no puede ganar otro.
+      return (
+        <div className="trivia-nogift-overlay">
+          <div className="trivia-nogift-content">
+            <button className="trivia-nogift-close" onClick={onClose} aria-label="Cerrar">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+
+            <div className="trivia-nogift-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+
+            <h2 className="trivia-nogift-title">¡Felicidades!</h2>
+            <p className="trivia-nogift-message">
+              Has demostrado un gran conocimiento, pero ya has reclamado tu premio único.
+            </p>
+            <p className="trivia-nogift-message-secondary">
+              ¡Gracias por participar!
+            </p>
+
+            <div className="trivia-nogift-actions">
+              <button className="trivia-nogift-button trivia-nogift-button-close" onClick={onClose}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Si ganó un curso y NO ha reclamado NINGÚN regalo antes
     return (
       <div className="trivia-modal-content trivia-game-finished">
         <button className="trivia-modal-close" onClick={onClose} aria-label="Cerrar juego de trivia">
@@ -195,30 +281,57 @@ export default function TriviaGame({ onClose, onGameComplete }: TriviaGameProps)
             <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
           )}
         </div>
-        <h2>{hasWonGame ? '¡Felicidades, has ganado!' : '¡Lo siento, no has ganado!'}</h2>
+        <h2>{hasWonGame ? '¡Felicidades, has ganado el juego!' : '¡Lo siento, no has ganado el juego!'}</h2>
         <p>Has acertado {score} de {totalQuestions} preguntas.</p>
 
-        {hasWonCourse && giftedCourse ? (
+        {hasWonCourse && giftedCourse && !hasAlreadyClaimedGiftedCourse ? (
+          // Mostrar tarjeta de regalo si ganó, el curso existe y no ha sido reclamado
           <>
-            <p className="trivia-win-message">¡Has respondido {score} preguntas correctamente y has ganado un curso gratis!</p>
+            <p className="trivia-win-message">¡Por tu excelente desempeño, has ganado un curso gratis!</p>
             <div className="trivia-gift-card">
               <img src={giftedCourse.imageUrl} alt={giftedCourse.title} className="trivia-gift-card-image" />
               <div className="trivia-gift-card-content">
                 <h3 className="trivia-gift-card-title">{giftedCourse.title}</h3>
                 <p className="trivia-gift-card-description">{giftedCourse.description}</p>
-                <button className="trivia-gift-card-button" onClick={() => alert(`¡Felicidades! Has reclamado el curso: ${giftedCourse.title}`)}>
+                <button
+                  className="trivia-gift-card-button"
+                  onClick={() => {
+                    onClaimGiftedCourse(giftedCourse.id); // Llama a la nueva prop
+                    onClose(); // Cierra el modal del juego después de reclamar
+                  }}
+                >
                   Reclamar Curso
                 </button>
               </div>
             </div>
+            <button className="trivia-start-button" onClick={onClose}>
+              Cerrar
+            </button>
+          </>
+        ) : hasWonCourse && giftedCourse && hasAlreadyClaimedGiftedCourse ? (
+          // Mostrar mensaje si ganó, el curso existe, pero ya lo tiene
+          <>
+            <p className="trivia-win-message">¡Felicidades! Ya tienes este curso en tu biblioteca.</p>
+            <p className="trivia-gift-card-description">Puedes acceder a él en cualquier momento desde tu perfil.</p>
+            <button
+              className="trivia-gift-card-button"
+              onClick={() => {
+                onClaimGiftedCourse(giftedCourse.id); // Navegar al curso incluso si ya lo tiene
+                onClose();
+              }}
+            >
+              Ir al Curso
+            </button>
+            <button className="trivia-start-button" onClick={onClose}>
+              Cerrar
+            </button>
           </>
         ) : (
-          <p className="trivia-win-message">Sigue practicando para ganar un curso gratis. Necesitas {GIFT_COURSE_THRESHOLD} aciertos.</p>
+          // Fallback si hasWonCourse es true pero no hay giftedCourse o otros casos
+          <button className="trivia-start-button" onClick={onClose}>
+            Cerrar
+          </button>
         )}
-
-        <button className="trivia-start-button" onClick={onClose}>
-          Cerrar
-        </button>
       </div>
     );
   }

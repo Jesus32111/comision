@@ -1,22 +1,29 @@
 import { useState, useRef, useEffect } from 'react';
 import CoursesSection from './CoursesSection';
-import TriviaGame from './TriviaGame'; // Importar el nuevo componente TriviaGame
+import TriviaGame from './TriviaGame';
 import './HomePage.css';
+import { courses } from '../data/courses'; // Importar la lista de cursos para obtener títulos
 
 interface HomePageProps {
   user: {
     nombre: string;
     email:string;
     carrera: string;
+    purchasedCourses: string[]; // Necesario para TriviaGame
+    hasClaimedAnyGift: boolean; // Propiedad para saber si el usuario ya reclamó un regalo
+    obtainedCertificates: string[]; // Nueva prop para certificados obtenidos
   };
   onLogout: () => void;
-  onSelectCourse: (courseId: string) => void; // Nueva prop
+  onSelectCourse: (courseId: string) => void;
+  onClaimGiftedCourse: (courseId: string) => void;
+  userPurchasedCourses: string[];
+  hasClaimedAnyGift: boolean; // Propiedad para saber si el usuario ya reclamó un regalo
 }
 
-export default function HomePage({ user, onLogout, onSelectCourse }: HomePageProps) {
+export default function HomePage({ user, onLogout, onSelectCourse, onClaimGiftedCourse, userPurchasedCourses, hasClaimedAnyGift }: HomePageProps) {
   const [showProfileCard, setShowProfileCard] = useState(false);
   const [showTriviaModal, setShowTriviaModal] = useState(false);
-  const [isTriviaActive, setIsTriviaActive] = useState(false); // Nuevo estado para controlar si la trivia está activa
+  const [isTriviaActive, setIsTriviaActive] = useState(false);
   const [profileImage, setProfileImage] = useState('https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
   const profileCardRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -62,14 +69,9 @@ export default function HomePage({ user, onLogout, onSelectCourse }: HomePagePro
     setIsTriviaActive(false); // Resetear el estado de la trivia
   };
 
-  const handleTriviaGameComplete = (won: boolean) => {
-    if (won) {
-      alert('¡Felicidades! Has ganado un curso gratis. Revisa tu perfil.');
-      // Aquí podrías añadir lógica para "otorgar" un curso gratis al usuario
-    } else {
-      alert('¡Sigue practicando! No has ganado un curso gratis esta vez.');
-    }
-    handleCloseTriviaModal();
+  const getCourseTitle = (courseId: string) => {
+    const course = courses.find(c => c.id === courseId);
+    return course ? course.title : 'Curso Desconocido';
   };
 
   return (
@@ -77,15 +79,27 @@ export default function HomePage({ user, onLogout, onSelectCourse }: HomePagePro
       <header className="homepage-header">
         <div className="header-left">
           <img src="/assets/logo.png" alt="Crece +Perú Logo" className="homepage-logo" />
-          <button className="gift-button" onClick={() => setShowTriviaModal(true)}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 12 20 22 4 22 4 12"></polyline>
-              <rect x="2" y="7" width="20" height="5"></rect>
-              <line x1="12" y1="22" x2="12" y2="7"></line>
-              <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
-              <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
-            </svg>
-            Regalo
+          <button
+            className="gift-button"
+            onClick={() => setShowTriviaModal(true)}
+            disabled={user.hasClaimedAnyGift} // Deshabilitar si el usuario ya reclamó un regalo
+            title={user.hasClaimedAnyGift ? "Ya has reclamado tu premio único." : "Demuestra tus conocimientos y gana un curso gratis."}
+          >
+            {user.hasClaimedAnyGift ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                <rect x="2" y="7" width="20" height="5"></rect>
+                <line x1="12" y1="22" x2="12" y2="7"></line>
+                <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+              </svg>
+            )}
+            {user.hasClaimedAnyGift ? "Reclamado" : "Regalo"}
           </button>
         </div>
         <nav className="homepage-nav">
@@ -122,6 +136,26 @@ export default function HomePage({ user, onLogout, onSelectCourse }: HomePagePro
                   <p><strong>Email:</strong> {user.email}</p>
                   <p><strong>Carrera:</strong> {user.carrera}</p>
                 </div>
+
+                {user.obtainedCertificates.length > 0 && (
+                  <div className="profile-certificates-section">
+                    <h4>Certificados Obtenidos</h4>
+                    <ul className="certificate-list">
+                      {user.obtainedCertificates.map(certId => (
+                        <li key={certId} className="certificate-item">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="medal-icon">
+                            <path d="M12 17.25L10.5 15.75L9 17.25L7.5 15.75L6 17.25L4.5 15.75L3 17.25V21H21V17.25L19.5 15.75L18 17.25L16.5 15.75L15 17.25L13.5 15.75L12 17.25Z"></path>
+                            <path d="M12 14L12 3"></path>
+                            <path d="M12 3L16 7"></path>
+                            <path d="M12 3L8 7"></path>
+                            <path d="M12 14C14.7614 14 17 11.7614 17 9C17 6.23858 14.7614 4 12 4C9.23858 4 7 6.23858 7 9C7 11.7614 9.23858 14 12 14Z"></path>
+                          </svg>
+                          <span>{getCourseTitle(certId)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -143,7 +177,7 @@ export default function HomePage({ user, onLogout, onSelectCourse }: HomePagePro
             <button className="hero-cta-button">Explorar Cursos</button>
           </div>
         </section>
-        <CoursesSection onCourseClick={onSelectCourse} /> {/* Pasar la función */}
+        <CoursesSection onCourseClick={onSelectCourse} />
       </main>
 
       {/* Trivia Modal */}
@@ -167,7 +201,13 @@ export default function HomePage({ user, onLogout, onSelectCourse }: HomePagePro
               </button>
             </div>
           ) : (
-            <TriviaGame onClose={handleCloseTriviaModal} onGameComplete={handleTriviaGameComplete} />
+            <TriviaGame
+              onClose={handleCloseTriviaModal}
+              onGameComplete={() => { /* No hacer nada aquí, TriviaGame maneja su propia finalización */ }}
+              onClaimGiftedCourse={onClaimGiftedCourse}
+              userPurchasedCourses={userPurchasedCourses}
+              hasClaimedAnyGift={hasClaimedAnyGift}
+            />
           )}
         </div>
       )}

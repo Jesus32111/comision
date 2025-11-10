@@ -258,6 +258,57 @@
   color: var(--text);
 }
 
+/* New styles for Certificates Section */
+.profile-certificates-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  width: 100%;
+}
+
+.profile-certificates-section h4 {
+  font-size: 1.1rem;
+  color: var(--primary);
+  margin-bottom: 0.8rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.certificate-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.certificate-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.9rem;
+  color: var(--textSecondary);
+  background-color: rgba(var(--primary-rgb), 0.08);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.certificate-item:hover {
+  background-color: rgba(var(--primary-rgb), 0.15);
+  border-color: var(--primary);
+}
+
+.certificate-item .medal-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--accent); /* Color de la medalla */
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+
 .homepage-main {
   flex-grow: 1;
   display: flex;
@@ -418,6 +469,12 @@
     padding: 0.8rem 2rem;
     font-size: 0.95rem;
   }
+  .profile-card {
+    width: 90%; /* Ajustar ancho de la tarjeta en móviles */
+    left: 5%;
+    right: 5%;
+    transform: translateY(-10px);
+  }
 }
 
 @media (max-width: 480px) {
@@ -482,6 +539,29 @@
   fill: var(--background); /* Relleno del icono */
   stroke: var(--background); /* Borde del icono */
 }
+
+/* Estilos para el botón de regalo deshabilitado */
+.gift-button:disabled {
+  background-color: var(--border); /* Fondo grisáceo */
+  color: var(--textSecondary); /* Texto más tenue */
+  cursor: not-allowed;
+  box-shadow: none; /* Sin sombra */
+  animation: none; /* Sin animación de pulsación */
+  opacity: 0.7; /* Ligera transparencia */
+  transform: none; /* Eliminar transformaciones de hover */
+}
+
+.gift-button:disabled:hover {
+  background-color: var(--border); /* Mantener el color en hover */
+  transform: none; /* No hay transformación en hover */
+  box-shadow: none; /* No hay sombra en hover */
+}
+
+.gift-button:disabled svg {
+  stroke: var(--textSecondary); /* Icono más tenue */
+  fill: var(--textSecondary); /* Relleno del icono más tenue */
+}
+
 
 /* Pulse Animation */
 @keyframes pulse {
