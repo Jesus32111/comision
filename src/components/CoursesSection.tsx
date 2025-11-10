@@ -1,16 +1,13 @@
-import React from 'react';
 import './CoursesSection.css';
 import { courses } from '../data/courses';
 
+interface CoursesSectionProps {
+  onCourseClick: (courseId: string) => void;
+}
 
-export default function CoursesSection() {
-  const handleCourseClick = (courseId: string) => {
-    alert(`Has seleccionado el curso: ${courseId}`);
-    // Aquí podrías redirigir a una página de detalles del curso
-  };
-
+export default function CoursesSection({ onCourseClick }: CoursesSectionProps) {
   return (
-    <section className="courses-section">
+    <section id="cursos" className="courses-section">
       <h2 className="courses-title">Nuestros Cursos para Certificación</h2>
       <p className="courses-subtitle">Impulsa tu carrera con programas diseñados para el éxito.</p>
       <div className="courses-grid">
@@ -18,7 +15,7 @@ export default function CoursesSection() {
           <div
             key={course.id}
             className={`course-card ${course.status === 'coming_soon' ? 'coming-soon' : ''}`}
-            onClick={course.status === 'available' ? () => handleCourseClick(course.id) : undefined}
+            onClick={course.status === 'available' ? () => onCourseClick(course.id) : undefined}
           >
             <div className="course-image-wrapper">
               <img src={course.imageUrl} alt={course.title} className="course-image" />

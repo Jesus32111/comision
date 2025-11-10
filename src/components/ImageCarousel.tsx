@@ -11,7 +11,7 @@ export default function ImageCarousel({ images, interval = 5000 }: ImageCarousel
   const [prevSlideIndex, setPrevSlideIndex] = useState<number | null>(null);
   const [direction, setDirection] = useState<'left' | 'right'>('left');
   
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   // Función para avanzar automáticamente
   const advanceSlide = useCallback(() => {
@@ -50,7 +50,7 @@ export default function ImageCarousel({ images, interval = 5000 }: ImageCarousel
   };
   
   // Calcula las variables CSS para la animación
-  const getAnimationVariables = (index: number) => {
+  const getAnimationVariables = () => {
     let panStart = '0%';
     let panEnd = '-5%';
     let slideFrom = '100%';
@@ -99,7 +99,7 @@ export default function ImageCarousel({ images, interval = 5000 }: ImageCarousel
             src={image}
             alt={`Slide ${index + 1}`}
             className={getClassName(index)}
-            style={getAnimationVariables(index)}
+            style={getAnimationVariables()}
             onAnimationEnd={() => {
               // Una vez que la animación de salida termina, resetea el prevSlideIndex
               if (index === prevSlideIndex) {

@@ -1,5 +1,14 @@
 @import '../styles/variables.css'; /* Importar variables de color */
 
+/* Define RGB values for palette colors for use in rgba() */
+:root {
+  --primary-rgb: 158, 127, 255;
+  --secondary-rgb: 56, 189, 248;
+  --accent-rgb: 244, 114, 182;
+  --success-rgb: 16, 185, 129;
+  --error-rgb: 239, 68, 68;
+}
+
 .homepage-container {
   display: flex;
   flex-direction: column;
@@ -26,6 +35,13 @@
   top: 0; /* Se pega en la parte superior */
   z-index: 1000; /* Asegura que esté por encima de otros elementos */
   transition: box-shadow 0.3s ease; /* Transición suave para la sombra */
+}
+
+/* Nuevo estilo para alinear el logo y el botón de regalo */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* Espacio entre el logo y el botón */
 }
 
 .homepage-logo {
@@ -132,7 +148,7 @@
   border-radius: 10px; /* Bordes más redondeados */
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
+  box-shadow: 0 4px 15px rgba(var(--error-rgb), 0.25);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -140,7 +156,7 @@
 
 .logout-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+  box-shadow: 0 6px 20px rgba(var(--error-rgb), 0.35);
   background: #dc2626; /* Un rojo ligeramente más oscuro al hover */
 }
 
@@ -300,14 +316,14 @@
   border-radius: 12px; /* Bordes más redondeados */
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3); /* Sombra más fuerte */
+  box-shadow: 0 8px 25px rgba(var(--primary-rgb), 0.3); /* Sombra más fuerte */
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .hero-cta-button:hover {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.4); /* Sombra mejorada al pasar el ratón */
+  box-shadow: 0 12px 30px rgba(var(--secondary-rgb), 0.4); /* Sombra mejorada al pasar el ratón */
   background: linear-gradient(45deg, var(--secondary), var(--primary)); /* Degradado inverso al pasar el ratón */
 }
 
@@ -344,6 +360,10 @@
   .hero-cta-button {
     padding: 0.9rem 2.2rem;
     font-size: 1rem;
+  }
+  .profile-card {
+    right: 50%;
+    transform: translateX(50%) translateY(-10px); /* Centrar la tarjeta en móviles */
   }
 }
 
@@ -398,10 +418,6 @@
     padding: 0.8rem 2rem;
     font-size: 0.95rem;
   }
-  .profile-card {
-    right: 50%;
-    transform: translateX(50%) translateY(-10px); /* Centrar la tarjeta en móviles */
-  }
 }
 
 @media (max-width: 480px) {
@@ -433,5 +449,439 @@
     left: 5%;
     right: 5%;
     transform: translateY(-10px);
+  }
+}
+
+/* Gift Button */
+.gift-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--accent); /* Color llamativo */
+  color: var(--background);
+  border: none;
+  border-radius: 25px; /* Más redondeado */
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 18px rgba(var(--accent-rgb), 0.4); /* Sombra con color del acento */
+  animation: pulse 2s infinite; /* Animación de pulsación */
+}
+
+.gift-button:hover {
+  background-color: #e73e90; /* Tono más oscuro al pasar el ratón */
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.6);
+}
+
+.gift-button svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--background); /* Relleno del icono */
+  stroke: var(--background); /* Borde del icono */
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 6px 18px rgba(var(--accent-rgb), 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(var(--accent-rgb), 0.6);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 6px 18px rgba(var(--accent-rgb), 0.4);
+  }
+}
+
+/* Trivia Modal */
+.trivia-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.trivia-modal-content {
+  background-color: var(--surface);
+  border-radius: 20px;
+  padding: 3rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.trivia-modal-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  color: var(--textSecondary);
+  cursor: pointer;
+  font-size: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+.trivia-modal-close:hover {
+  color: var(--error);
+}
+
+.trivia-modal-close svg {
+  width: 24px;
+  height: 24px;
+}
+
+.trivia-modal-icon {
+  margin-bottom: 1rem;
+}
+
+.trivia-modal-icon svg {
+  width: 60px;
+  height: 60px;
+  stroke-width: 1.5;
+}
+
+.trivia-modal-icon.win-icon svg {
+  color: var(--success); /* Icono de victoria */
+}
+.trivia-modal-icon.lose-icon svg {
+  color: var(--error); /* Icono de derrota */
+}
+
+.trivia-modal-content h2 {
+  font-size: 2.8rem; /* Even larger */
+  color: var(--primary);
+  margin-bottom: 1rem;
+  font-weight: 900; /* Super bold */
+  line-height: 1.1;
+  background: linear-gradient(45deg, var(--primary), var(--secondary)); /* Gradient text */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: scaleIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}
+
+.trivia-modal-content p {
+  font-size: 1.1rem;
+  color: var(--textSecondary);
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.trivia-win-message {
+  font-size: 1.4rem;
+  color: var(--accent); /* Use accent color */
+  font-weight: 700;
+  margin-top: 1rem;
+  animation: bounceIn 0.8s ease-out;
+}
+
+.trivia-start-button {
+  background-color: var(--primary);
+  color: var(--background);
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 2.5rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 6px 18px rgba(var(--primary-rgb), 0.4);
+}
+
+.trivia-start-button:hover {
+  background-color: #8a6bff;
+  transform: translateY(-3px);
+}
+
+.trivia-start-button:active {
+  transform: translateY(0);
+}
+
+/* --- Trivia Game Specific Styles --- */
+.trivia-game-active {
+  padding: 2.5rem; /* Ajustar padding para el juego activo */
+  max-width: 600px; /* Un poco más ancho para el juego */
+  gap: 2rem;
+}
+
+.trivia-progress {
+  font-size: 1rem; /* Slightly larger */
+  color: var(--textSecondary);
+  margin-bottom: 1.5rem; /* More space */
+  font-weight: 700; /* Bolder */
+  letter-spacing: 0.05em; /* More pronounced spacing */
+  text-transform: uppercase; /* Make it stand out */
+  background: rgba(var(--primary-rgb), 0.1); /* Subtle background */
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.trivia-question {
+  font-size: 2.2rem; /* Larger */
+  color: var(--text);
+  margin-bottom: 2rem;
+  font-weight: 800; /* Bolder */
+  line-height: 1.3;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  animation: textFadeIn 0.6s ease-out; /* New animation */
+}
+
+.trivia-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.trivia-option {
+  background-color: var(--surface);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 16px; /* More rounded */
+  padding: 1.1rem 1.8rem; /* More padding */
+  font-size: 1.15rem; /* Slightly larger */
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease; /* Smoother transitions */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); /* Stronger shadow */
+  position: relative; /* For potential pseudo-elements */
+  overflow: hidden;
+}
+
+.trivia-option:hover:not(.selected):not(.correct):not(.incorrect) {
+  border-color: var(--secondary); /* Change border color on hover */
+  transform: translateY(-4px) scale(1.01); /* More pronounced hover effect */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  background-color: var(--border); /* Subtle background change */
+}
+
+.trivia-option.selected {
+  border-color: var(--primary);
+  background-color: rgba(var(--primary-rgb), 0.15); /* More visible selection */
+  box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.3);
+  transform: scale(1.01); /* Slight scale on selection */
+}
+
+.trivia-option.correct {
+  background-color: var(--success);
+  color: var(--background);
+  border-color: var(--success);
+  box-shadow: 0 6px 20px rgba(var(--success-rgb), 0.4);
+  animation: pulseCorrect 0.6s ease-out; /* Longer pulse */
+}
+
+.trivia-option.incorrect {
+  background-color: var(--error);
+  color: var(--background);
+  border-color: var(--error);
+  box-shadow: 0 6px 20px rgba(var(--error-rgb), 0.4);
+  animation: shake 0.4s ease-out; /* Slightly longer shake */
+}
+
+.trivia-option.disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@keyframes pulseCorrect {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+.trivia-actions {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+.trivia-submit-button,
+.trivia-next-button {
+  background: linear-gradient(45deg, var(--primary), var(--secondary)); /* Gradient buttons */
+  color: var(--background);
+  border: none;
+  border-radius: 16px; /* More rounded */
+  padding: 1rem 2.8rem; /* Larger padding */
+  font-size: 1.2rem; /* Larger font */
+  font-weight: 800; /* Bolder */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(var(--primary-rgb), 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trivia-submit-button:hover,
+.trivia-next-button:hover {
+  background: linear-gradient(45deg, var(--secondary), var(--primary)); /* Reverse gradient on hover */
+  transform: translateY(-5px) scale(1.02); /* More pronounced hover */
+  box-shadow: 0 12px 30px rgba(var(--secondary-rgb), 0.5);
+}
+
+.trivia-submit-button:disabled,
+.trivia-next-button:disabled {
+  background: var(--border);
+  color: var(--textSecondary);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* --- Timer Bar Styles --- */
+.trivia-timer-bar-wrapper {
+  width: 100%;
+  height: 10px;
+  background-color: var(--border);
+  border-radius: 5px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.trivia-timer-bar-fill {
+  width: 100%;
+  height: 100%;
+  background: var(--success); /* Solid green */
+  border-radius: 5px;
+  transform-origin: left;
+  animation: timer-countdown 10s linear forwards; /* Animación de 10 segundos */
+}
+
+@keyframes timer-countdown {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* --- Game Finished Screen Styles --- */
+.trivia-game-finished {
+  padding: 3rem;
+  max-width: 500px;
+}
+
+.trivia-game-finished h2 {
+  color: var(--primary);
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.trivia-game-finished p {
+  font-size: 1.2rem;
+  color: var(--textSecondary);
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .trivia-modal-content {
+    padding: 2rem;
+    gap: 1rem;
+  }
+  .trivia-modal-content h2 {
+    font-size: 1.8rem;
+  }
+  .trivia-modal-content p {
+    font-size: 1rem;
+  }
+  .trivia-start-button {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+  }
+  .trivia-game-active {
+    padding: 1.5rem;
+  }
+  .trivia-question {
+    font-size: 1.5rem;
+  }
+  .trivia-option {
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+  }
+  .trivia-submit-button,
+  .trivia-next-button {
+    padding: 0.8rem 1.8rem;
+    font-size: 1rem;
+  }
+}
+
+/* New Animations */
+@keyframes textFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes bounceIn {
+  0%, 20%, 40%, 60%, 80%, 100% {
+    transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+  }
+  0% {
+    opacity: 0;
+    transform: scale3d(.3, .3, .3);
+  }
+  20% {
+    transform: scale3d(1.1, 1.1, 1.1);
+  }
+  40% {
+    transform: scale3d(.9, .9, .9);
+  }
+  60% {
+    opacity: 1;
+    transform: scale3d(1.03, 1.03, 1.03);
+  }
+  80% {
+    transform: scale3d(.97, .97, .97);
+  }
+  100% {
+    opacity: 1;
+    transform: scale3d(1, 1, 1);
   }
 }

@@ -21,6 +21,8 @@ interface AuthPageProps {
   onLoginSuccess: (user: { nombre: string; email: string; carrera: string }) => void;
 }
 
+const API_URL = 'https://backendrender-6d79.onrender.com/users';
+
 export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [currentImage, setCurrentImage] = useState(0);
@@ -36,7 +38,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
   const [apiError, setApiError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showRegistrationSuccess, setShowRegistrationSuccess] = useState(false);
-  const [showOtherCareerInput, setShowOtherCareerInput] = useState(false); // Nuevo estado para mostrar input de "Otra carrera"
+  const [showOtherCareerInput, setShowOtherCareerInput] = useState(false);
 
   const images = [
     '/assets/transicion1.jpg',
@@ -147,7 +149,6 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
         newErrors.confirmPassword = 'Las contraseñas no coinciden';
       }
       
-      // Validación para carrera (select o input de "Otro...")
       if (!formData.carrera?.trim() || formData.carrera === 'Selecciona tu carrera') {
         newErrors.carrera = 'La carrera es requerida';
       }
@@ -161,69 +162,80 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
     e.preventDefault();
     setApiError(null);
 
-    if (validateForm()) {
-      setIsLoading(true);
-      if (isLogin) {
-        try {
-          const response = await fetch(`http://localhost:3001/users?email=${formData.email}&password=${formData.password}`);
-          if (!response.ok) {
-            throw new Error('Error en el servidor. Inténtalo de nuevo.');
-          }
-          const users = await response.json();
-          if (users.length > 0) {
-            onLoginSuccess({ nombre: users[0].nombre, email: users[0].email, carrera: users[0].carrera });
-          } else {
-            setApiError('Email o contraseña incorrectos.');
-          }
-        } catch (error) {
-          setApiError('No se pudo conectar con el servidor. Verifica que esté corriendo.');
-        } finally {
-          setIsLoading(false);
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    if (isLogin) {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error('Error en el servidor. Inténtalo de nuevo.');
         }
-      } else {
-        try {
-          const checkUserResponse = await fetch(`http://localhost:3001/users?email=${formData.email}`);
-          const existingUsers = await checkUserResponse.json();
+        const users = await response.json();
+        const foundUser = users.find(
+          (user: any) => user.email === formData.email && user.password === formData.password
+        );
 
-          if (existingUsers.length > 0) {
-            setApiError('Este correo electrónico ya está registrado.');
-            setIsLoading(false);
-            return;
-          }
-
-          const newUser = {
-            nombre: formData.nombre,
-            email: formData.email,
-            password: formData.password,
-            carrera: formData.carrera,
-          };
-
-          const createUserResponse = await fetch('http://localhost:3001/users', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newUser),
-          });
-
-          if (!createUserResponse.ok) {
-            throw new Error('No se pudo crear el usuario.');
-          }
-
-          setShowRegistrationSuccess(true);
-          setTimeout(() => {
-            setShowRegistrationSuccess(false);
-            setIsLogin(true);
-            setFormData({ nombre: '', email: '', password: '', confirmPassword: '', carrera: '' });
-            setErrors({});
-            setShowOtherCareerInput(false); // Resetear también el estado del input de "Otra carrera"
-          }, 3500);
-
-        } catch (error) {
-          setApiError('Ocurrió un error durante el registro.');
-        } finally {
-          setIsLoading(false);
+        if (foundUser) {
+          onLoginSuccess({ nombre: foundUser.nombre, email: foundUser.email, carrera: foundUser.carrera });
+        } else {
+          setApiError('Email o contraseña incorrectos.');
         }
+      } catch (error) {
+        setApiError('No se pudo conectar con el servidor. Verifica que esté corriendo.');
+      } finally {
+        setIsLoading(false);
+      }
+    } else { // Registration logic
+      try {
+        const checkUserResponse = await fetch(API_URL);
+        if (!checkUserResponse.ok) {
+          throw new Error('No se pudo verificar el usuario existente.');
+        }
+        const existingUsers = await checkUserResponse.json();
+        const userExists = existingUsers.some((user: any) => user.email === formData.email);
+
+        if (userExists) {
+          setApiError('Este correo electrónico ya está registrado.');
+          setIsLoading(false);
+          return;
+        }
+
+        const newUser = {
+          nombre: formData.nombre,
+          email: formData.email,
+          password: formData.password,
+          carrera: formData.carrera,
+        };
+
+        const createUserResponse = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newUser),
+        });
+
+        if (!createUserResponse.ok) {
+          throw new Error('No se pudo crear el usuario.');
+        }
+
+        setShowRegistrationSuccess(true);
+        setTimeout(() => {
+          setShowRegistrationSuccess(false);
+          setIsLogin(true);
+          setFormData({ nombre: '', email: '', password: '', confirmPassword: '', carrera: '' });
+          setErrors({});
+          setShowOtherCareerInput(false);
+        }, 3500);
+
+      } catch (error) {
+        setApiError('Ocurrió un error durante el registro.');
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -234,22 +246,20 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
     if (name === 'carrera') {
       if (value === 'Otro...') {
         setShowOtherCareerInput(true);
-        setFormData(prev => ({ ...prev, [name]: '' })); // Limpiar carrera para que el input de "Otro" la llene
+        setFormData(prev => ({ ...prev, [name]: '' }));
       } else {
         setShowOtherCareerInput(false);
         setFormData(prev => ({ ...prev, [name]: value }));
       }
-    } else if (name === 'otherCareerInput') { // Nombre para el input de "Otra carrera"
+    } else if (name === 'otherCareerInput') {
       setFormData(prev => ({ ...prev, carrera: value }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
 
-    // Limpiar errores al cambiar el input
     if (errors[name as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
-    // Si se está escribiendo en el input de "Otra carrera", limpiar el error de "carrera"
     if (name === 'otherCareerInput' && errors.carrera) {
       setErrors(prev => ({ ...prev, carrera: '' }));
     }
@@ -261,7 +271,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
     setErrors({});
     setApiError(null);
     setShowRegistrationSuccess(false);
-    setShowOtherCareerInput(false); // Resetear también el estado del input de "Otra carrera"
+    setShowOtherCareerInput(false);
   };
 
   return (
@@ -302,7 +312,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
                   onChange={handleInputChange}
                   className={errors.carrera ? 'error' : ''}
                 >
-                  {peruvianCareers.map((career, index) => (
+                  {peruvianCareers.map((career) => (
                     <option
                       key={career}
                       value={career}

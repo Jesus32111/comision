@@ -20,7 +20,7 @@ interface ChatMessage {
   aiReason?: string;
 }
 
-// Renderiza texto con negritas estilo Markdown (**texto**)
+// Renderiza texto con **negritas**
 const FormattedText = ({ text }: { text: string }) => {
   const parts = text.split('**');
   return (
@@ -59,9 +59,7 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
   };
 
   const handleCourseClick = (courseId: string) => {
-    alert(
-      `Excelente elección. Este curso podría ayudarte a fortalecer tu perfil profesional.\nID del curso: ${courseId}`
-    );
+    alert(`Excelente elección. Este curso podría ayudarte a fortalecer tu perfil profesional.\nID del curso: ${courseId}`);
   };
 
   const sendMessage = async () => {
@@ -80,90 +78,81 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
       const courseListForAI = availableCourses
         .map(
           (c) =>
-            `ID: ${c.id}, Título: ${c.title}, Dificultad: ${c.difficulty}, Beneficios: ${c.careerBenefits.join(', ')}`
+            `ID: ${c.id}, Título: ${c.title}, Carreras Relacionadas: [${c.relatedCareers.join(', ')}]`
         )
         .join('\n');
 
-      let userContext = `El usuario pregunta: "${text}".`;
-      if (user.carrera && user.carrera !== 'Selecciona tu carrera' && user.carrera !== 'Otro...') {
-        userContext = `El usuario tiene la carrera de "${user.carrera}" y pregunta: "${text}".`;
-      }
+      const userCareer =
+        user.carrera && user.carrera !== 'Selecciona tu carrera' && user.carrera !== 'Otro...'
+          ? user.carrera
+          : 'No especificada';
 
-      // 🧩 Detectar si el usuario solo saluda o agradece
-      const simpleResponseKeywords = [
-        'gracias',
-        'ok',
-        'perfecto',
-        'entendido',
-        'de acuerdo',
-        'vale',
-        'hola',
-        'buenos días',
-        'buenas tardes',
-        'buenas noches',
-        'adiós',
-        'nos vemos',
-      ];
-      const isSimpleResponse = simpleResponseKeywords.some((word) =>
-        text.toLowerCase().includes(word)
-      );
-
-      if (isSimpleResponse) {
-        appendMessage({
-          text: '¡De nada! 😊 Si más adelante deseas explorar nuevas oportunidades o aprender algo, estaré aquí para ayudarte.',
-          sender: 'bot',
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // 🧠 PROMPT CONTROLADO: solo recomendar cursos cuando sea pertinente
+      // 🧠 PROMPT FINAL – incluye conversación, agradecimientos y empatía
       const prompt = `
-Eres un asesor laboral profesional y empático de **Crece +Perú**.
+Eres un **asesor laboral amigable y servicial** del programa **Crece +Perú**. 
+Tu rol es conversar con el usuario de forma empática, profesional y útil, 
+brindando apoyo sobre empleo, formación, crecimiento profesional o habilidades.
 
-${userContext}
+**Datos del usuario:**
+- Nombre: ${user.nombre}
+- Carrera: ${userCareer}
+- Mensaje del usuario: "${text}"
 
-Tu objetivo es orientar al usuario de manera útil y cercana, sin sonar comercial ni insistente.
-
-**Instrucciones:**
-1. Si el usuario pregunta sobre **aprendizaje, mejorar habilidades, capacitación, cursos, desarrollo profesional, empleo o cómo crecer laboralmente**, puedes **recomendar hasta 2 cursos** de la lista proporcionada.
-   - Usa este formato exacto:
-     RECOMMEND_COURSES: [
-       {id: "ID_CURSO_1", reason: "Motivo natural y breve"},
-       {id: "ID_CURSO_2", reason: "Motivo natural y breve"}
-     ]
-   - Ejemplo de tono: “Quizás te interese revisar estos cursos que podrían ayudarte…”
-
-2. Si el usuario pide **consejos o tips (por ejemplo, sobre CV, entrevistas, productividad o liderazgo)**:
-   - Da una respuesta práctica.
-   - Puedes **mencionar indirectamente los cursos** como complemento (“También podrías fortalecer tu perfil con certificaciones de estos cursos…”).
-
-3. Si el usuario **no pide nada relacionado con aprender, mejorar o trabajo**, responde **solo de forma conversacional y natural**, sin mencionar cursos.
-
-4. Si el usuario **saluda o agradece**, responde amablemente y **nunca recomiendes cursos**.
-
-Cursos disponibles:
+**Cursos disponibles:**
 ${courseListForAI}
+
+Debes clasificar el mensaje del usuario y responder según estos casos:
+
+1. 🧭 **RECOMMEND_COURSES** → cuando el usuario expresa interés claro en aprender, capacitarse o fortalecer habilidades.  
+   Ejemplo: “Qué curso me recomiendas”, “Quiero mejorar mi perfil”, “Necesito capacitarme”.
+
+2. 💬 **ADVICE** → cuando el usuario pide orientación o hace preguntas sobre empleo, entrevistas, liderazgo, habilidades, o desarrollo profesional en general.  
+   Debes dar **consejos concretos, naturales y útiles**, como un orientador real.
+
+3. 🤝 **SOCIAL_INTERACTION** → cuando el mensaje es un saludo o agradecimiento (“gracias”, “ok”, “adiós”, “hola”, “nos vemos”, etc.).  
+   Responde con amabilidad, muestra empatía y siempre cierra preguntando si desea algo más.  
+   Ejemplo: “¡Con gusto! 😊 ¿Hay algo más en lo que te pueda ayudar?”
+
+4. 🚫 **OUT_OF_SCOPE** → cuando el mensaje no tiene relación con temas laborales o profesionales.  
+   Responde con amabilidad e invita a hablar de desarrollo profesional.
+
+Devuelve SIEMPRE un JSON con la siguiente estructura:
+
+\`\`\`json
+{
+  "type": "RECOMMEND_COURSES" | "ADVICE" | "SOCIAL_INTERACTION" | "OUT_OF_SCOPE",
+  "message": "Texto para responder al usuario",
+  "data": [
+    { "id": "ID_DEL_CURSO", "reason": "Motivo por el que lo recomiendas" }
+  ] (solo si type es RECOMMEND_COURSES)
+}
+\`\`\`
+
+No uses texto fuera del JSON.  
+Tu tono debe ser **cálido, empático y profesional**.
 `;
 
       const result = await model.generateContent(prompt);
       const responseText = result.response.text().trim();
+      const cleanedJsonText = responseText.replace(/```json|```/g, '').trim();
 
-      // 🧩 Verificar si la IA quiso recomendar cursos
-      const match = responseText.match(
-        /RECOMMEND_COURSES:\s*\[(.*?)\]/s
-      );
+      try {
+        const parsedResponse = JSON.parse(cleanedJsonText);
 
-      if (match) {
-        try {
-          const jsonArrayText = `[${match[1]}]`;
-          const parsed = JSON.parse(jsonArrayText);
-
-          parsed.forEach((rec: { id: string; reason: string }) => {
+        if (parsedResponse.type === 'SOCIAL_INTERACTION') {
+          appendMessage({ text: parsedResponse.message, sender: 'bot' });
+        } else if (parsedResponse.type === 'ADVICE') {
+          appendMessage({ text: parsedResponse.message, sender: 'bot' });
+        } else if (parsedResponse.type === 'RECOMMEND_COURSES' && Array.isArray(parsedResponse.data)) {
+          appendMessage({
+            text: parsedResponse.message || 'He encontrado algunas opciones que podrían ayudarte 👇',
+            sender: 'bot',
+          });
+          parsedResponse.data.forEach((rec: { id: string; reason: string }) => {
             const recommendedCourse = courses.find((c) => c.id === rec.id);
             if (recommendedCourse) {
               appendMessage({
-                text: 'Quizá te interese algo que complemente lo que mencionas 👇',
+                text: '',
                 sender: 'bot',
                 isCourseRecommendation: true,
                 courseData: recommendedCourse,
@@ -171,16 +160,23 @@ ${courseListForAI}
               });
             }
           });
-        } catch {
-          appendMessage({ text: responseText, sender: 'bot' });
+        } else if (parsedResponse.type === 'OUT_OF_SCOPE') {
+          appendMessage({ text: parsedResponse.message, sender: 'bot' });
+        } else {
+          throw new Error('Estructura inválida en la respuesta del asistente');
         }
-      } else {
-        appendMessage({ text: responseText, sender: 'bot' });
+      } catch (err) {
+        console.error('Error al procesar respuesta del asistente:', err);
+        appendMessage({
+          text:
+            'Lo siento, no entendí del todo tu mensaje 😅. ¿Podrías contármelo de otra forma o decirme qué te gustaría lograr?',
+          sender: 'bot',
+        });
       }
     } catch (err) {
       console.error('Error al comunicarse con el asistente:', err);
       appendMessage({
-        text: '⚠️ Hubo un problema al procesar tu mensaje. Inténtalo más tarde.',
+        text: '⚠️ Hubo un problema de conexión con el asistente. Por favor, inténtalo más tarde.',
         sender: 'bot',
       });
     } finally {
@@ -205,38 +201,30 @@ ${courseListForAI}
           </button>
         </div>
 
-        <div className="chat-box" id="chatBox" ref={chatBoxRef}>
+        <div className="chat-box" ref={chatBoxRef}>
           {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`message ${msg.sender === 'user' ? 'user-msg' : 'bot-msg'}`}
-            >
+            <div key={index} className={`message ${msg.sender === 'user' ? 'user-msg' : 'bot-msg'}`}>
               {msg.isCourseRecommendation && msg.courseData ? (
-                <>
-                  <p className="bot-intro-text">
-                    <FormattedText text={msg.text} />
-                  </p>
-                  <div
-                    className="course-recommendation-card"
-                    onClick={() => handleCourseClick(msg.courseData!.id)}
-                  >
-                    <img
-                      src={msg.courseData.imageUrl}
-                      alt={msg.courseData.title}
-                      className="course-rec-image"
-                    />
-                    <div className="course-rec-content">
-                      <h4>{msg.courseData.title}</h4>
-                      <p className="course-rec-difficulty">
-                        Dificultad: <span>{msg.courseData.difficulty}</span>
-                      </p>
-                      <p className="course-rec-reason">
-                        <FormattedText text={msg.aiReason!} />
-                      </p>
-                      <button className="course-rec-button">Ver Curso</button>
-                    </div>
+                <div
+                  className="course-recommendation-card"
+                  onClick={() => handleCourseClick(msg.courseData!.id)}
+                >
+                  <img
+                    src={msg.courseData.imageUrl}
+                    alt={msg.courseData.title}
+                    className="course-rec-image"
+                  />
+                  <div className="course-rec-content">
+                    <h4>{msg.courseData.title}</h4>
+                    <p className="course-rec-difficulty">
+                      Dificultad: <span>{msg.courseData.difficulty}</span>
+                    </p>
+                    <p className="course-rec-reason">
+                      <FormattedText text={msg.aiReason!} />
+                    </p>
+                    <button className="course-rec-button">Ver Curso</button>
                   </div>
-                </>
+                </div>
               ) : (
                 <FormattedText text={msg.text} />
               )}
@@ -246,31 +234,20 @@ ${courseListForAI}
 
         <div className="chat-input">
           <textarea
-            id="userInput"
-            rows={1}
             placeholder="Escribe tu mensaje..."
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={isLoading}
           ></textarea>
-          <button id="sendBtn" onClick={sendMessage} disabled={isLoading}>
+          <button onClick={sendMessage} disabled={isLoading}>
             {isLoading ? 'Enviando...' : 'Enviar'}
           </button>
         </div>
       </div>
 
       <button onClick={toggleChat} className="chat-bubble">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          width="32"
-          height="32"
-        >
-          <path d="M12 2C6.486 2 2 5.589 2 10c0 2.908 1.897 5.515 5 6.934V22l5.34-4.005C17.044 17.587 22 14.258 22 10c0-4.411-4.486-8-10-8zm0 14h-.051c-1.262.022-4.132 1.231-4.949 1.867V16.58c.021-.016.042-.032.063-.048.005-.004.01-.007.015-.011A7.95 7.95 0 0 1 4 10c0-3.309 3.589-6 8-6s8 2.691 8 6-3.589 6-8 6z" />
-          <path d="M9.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
-        </svg>
+        <span className="text-4xl">🤖</span>
       </button>
     </div>
   );
