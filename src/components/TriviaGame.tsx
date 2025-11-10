@@ -15,66 +15,66 @@ interface Level {
 }
 
 const triviaLevels: Level[] = [
-  {
-    name: "Fácil",
-    questions: [
-      {
-        question: "¿Cuál es la capital de Perú?",
-        options: ["Cusco", "Arequipa", "Lima", "Trujillo"],
-        correctAnswer: "Lima",
-      },
-      {
-        question: "¿Qué animal es el símbolo nacional de Perú?",
-        options: ["Llama", "Cóndor", "Vicuña", "Alpaca"],
-        correctAnswer: "Vicuña",
-      },
-      {
-        question: "¿Qué civilización construyó Machu Picchu?",
-        options: ["Moche", "Nazca", "Inca", "Chimú"],
-        correctAnswer: "Inca",
-      },
-    ],
-  },
-  {
-    name: "Intermedio",
-    questions: [
-      {
-        question: "¿En qué año se proclamó la Independencia del Perú?",
-        options: ["1820", "1821", "1822", "1824"],
-        correctAnswer: "1821",
-      },
-      {
-        question: "¿Cuál es el río más largo del Perú?",
-        options: ["Ucayali", "Marañón", "Amazonas", "Madre de Dios"],
-        correctAnswer: "Ucayali",
-      },
-      {
-        question: "¿Qué desierto se encuentra en la costa sur de Perú?",
-        options: ["Sechura", "Atacama", "Ica", "Paracas"],
-        correctAnswer: "Ica",
-      },
-    ],
-  },
-  {
-    name: "Avanzado",
-    questions: [
-      {
-        question: "¿Quién fue el último inca de Vilcabamba?",
-        options: ["Atahualpa", "Manco Inca", "Túpac Amaru I", "Sayri Túpac"],
-        correctAnswer: "Túpac Amaru I",
-      },
-      {
-        question: "¿Qué batalla selló la independencia definitiva del Perú?",
-        options: ["Batalla de Junín", "Batalla de Ayacucho", "Batalla de Tarapacá", "Batalla de Miraflores"],
-        correctAnswer: "Batalla de Ayacucho",
-      },
-      {
-        question: "¿Cuál es el nombre del tratado que puso fin a la Guerra del Pacífico?",
-        options: ["Tratado de Ancón", "Tratado de Lima", "Tratado de Paucarpata", "Tratado de Guayaquil"],
-        correctAnswer: "Tratado de Ancón",
-      },
-    ],
-  },
+  {
+    name: "Fácil",
+    questions: [
+      {
+        question: "¿Cuál es el documento principal que envías al postular a un trabajo?",
+        options: ["DNI", "Currículum Vitae (CV)", "Carta de recomendación", "Contrato anterior"],
+        correctAnswer: "Currículum Vitae (CV)",
+      },
+      {
+        question: "¿Cómo se llama la reunión donde un empleador te conoce en persona o virtualmente?",
+        options: ["Examen final", "Reunión de equipo", "Entrevista de trabajo", "Capacitación"],
+        correctAnswer: "Entrevista de trabajo",
+      },
+      {
+        question: "Generalmente, ¿cómo deberías vestir para una entrevista de trabajo corporativa?",
+        options: ["Ropa deportiva", "Pijama", "Formal o semi-formal", "Ropa de playa"],
+        correctAnswer: "Formal o semi-formal",
+      },
+    ],
+  },
+  {
+    name: "Intermedio",
+    questions: [
+      {
+        question: "¿Cuál es la red social profesional más popular para buscar empleo y hacer networking?",
+        options: ["Facebook", "TikTok", "LinkedIn", "Instagram"],
+        correctAnswer: "LinkedIn",
+      },
+      {
+        question: "¿Qué información personal generalmente NO es necesario incluir en tu CV?",
+        options: ["Experiencia laboral", "Educación", "Estado civil o religión", "Datos de contacto"],
+        correctAnswer: "Estado civil o religión",
+      },
+      {
+        question: "El método 'STAR' (Situación, Tarea, Acción, Resultado) se usa para responder preguntas de...",
+        options: ["Comportamiento", "Técnicas", "Sueldo", "Conocimiento general"],
+        correctAnswer: "Comportamiento",
+      },
+    ],
+  },
+  {
+    name: "Avanzado",
+    questions: [
+      {
+        question: "La 'comunicación asertiva' y la 'gestión del tiempo' son ejemplos de...",
+        options: ["Habilidades duras (Hard skills)", "Habilidades blandas (Soft skills)", "Habilidades técnicas", "Requisitos legales"],
+        correctAnswer: "Habilidades blandas (Soft skills)",
+      },
+      {
+        question: "¿A qué se refiere el término 'salario bruto'?",
+        options: ["El salario después de impuestos", "El salario total antes de impuestos y deducciones", "El salario más bonificaciones", "El salario mínimo"],
+        correctAnswer: "El salario total antes de impuestos y deducciones",
+      },
+      {
+        question: "¿Qué es el 'mercado laboral oculto'?",
+        options: ["Trabajos ilegales", "Trabajos solo para extranjeros", "Vacantes que no se publican y se llenan por contactos", "Trabajos de medio tiempo"],
+        correctAnswer: "Vacantes que no se publican y se llenan por contactos",
+      },
+    ],
+  },
 ];
 
 interface TriviaGameProps {

@@ -138,8 +138,6 @@ function App() {
           onLogout={handleLogout}
           onSelectCourse={handleSelectCourse}
           onClaimGiftedCourse={handleClaimGiftedCourse}
-          userPurchasedCourses={user.purchasedCourses}
-          hasClaimedAnyGift={user.hasClaimedAnyGift} // Pasar la nueva prop
         />
         <ChatWidget user={user} />
       </>

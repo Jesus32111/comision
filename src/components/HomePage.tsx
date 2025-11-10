@@ -16,11 +16,9 @@ interface HomePageProps {
   onLogout: () => void;
   onSelectCourse: (courseId: string) => void;
   onClaimGiftedCourse: (courseId: string) => void;
-  userPurchasedCourses: string[];
-  hasClaimedAnyGift: boolean; // Propiedad para saber si el usuario ya reclamó un regalo
 }
 
-export default function HomePage({ user, onLogout, onSelectCourse, onClaimGiftedCourse, userPurchasedCourses, hasClaimedAnyGift }: HomePageProps) {
+export default function HomePage({ user, onLogout, onSelectCourse, onClaimGiftedCourse }: HomePageProps) {
   const [showProfileCard, setShowProfileCard] = useState(false);
   const [showTriviaModal, setShowTriviaModal] = useState(false);
   const [isTriviaActive, setIsTriviaActive] = useState(false);
@@ -205,8 +203,8 @@ export default function HomePage({ user, onLogout, onSelectCourse, onClaimGifted
               onClose={handleCloseTriviaModal}
               onGameComplete={() => { /* No hacer nada aquí, TriviaGame maneja su propia finalización */ }}
               onClaimGiftedCourse={onClaimGiftedCourse}
-              userPurchasedCourses={userPurchasedCourses}
-              hasClaimedAnyGift={hasClaimedAnyGift}
+              userPurchasedCourses={user.purchasedCourses}
+              hasClaimedAnyGift={user.hasClaimedAnyGift}
             />
           )}
         </div>
